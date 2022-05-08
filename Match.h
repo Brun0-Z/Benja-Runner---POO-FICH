@@ -21,10 +21,12 @@ private:
 	Character m_maincharacter;
 	int m_points = 0;
 	Texture m_txtbck; Sprite m_sprbck;
+	
 	Clock m_clock;
 	Time m_time;
 	Text m_textpoints, m_tpoint;
 	Font m_font;
+	Vector2f m_bckspeed;
 };
 
 #endif

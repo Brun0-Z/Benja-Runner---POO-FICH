@@ -6,6 +6,7 @@
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/System/Clock.hpp>
 #include <vector>
+#include <SFML/System/Vector2.hpp>
 using namespace std;
 
 
@@ -20,10 +21,11 @@ public:
 	bool CheckState();
 private:
 	int m_frame;
-	Sprite m_sprite;
 	vector<Texture>m_textures;
 	Clock m_clock;
 	bool m_IsAlive = true;
+	bool m_CanJump = true;
+	Vector2f m_vel, m_pos;
 };
 
 #endif

@@ -47,7 +47,7 @@ void Instructions::LoadResources(){
 
 void Instructions::ProcessEvent (Event & evt) {
 	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::Escape) {
-		m_EscapePressed = !m_EscapePressed;
+		m_EscapePressed = !m_EscapePressed; 
 	}
 	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::Return) {
 		m_ReturnPressed = !m_ReturnPressed;

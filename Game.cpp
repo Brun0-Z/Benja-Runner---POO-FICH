@@ -3,9 +3,7 @@
 #include "Title.h"
 using namespace sf;
 
-Game::Game() 
-	: m_window(VideoMode(800,600),"Benja Runner")
-{	
+Game::Game() : m_window(VideoMode(800,600),"Benja Runner"){	
 	m_window.setFramerateLimit(60);
 	m_scene = new Title();
 }
