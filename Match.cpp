@@ -5,6 +5,8 @@
 #include <string>
 #include <SFML/Graphics/Rect.hpp>
 #include <SFML/Window/Keyboard.hpp>
+#include <SFML/Window/Event.hpp>
+#include "Title.h"
 using namespace std;
 
 Match::Match() {
@@ -12,13 +14,19 @@ Match::Match() {
 }
 
 void Match::ProcessEvent (Event & evt) {
-	
+	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::P){
+		m_pause = !m_pause;
+	}
+	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::Escape){
+		m_EscapePressed = !m_EscapePressed;
+	}
 }
 
 void Match::Update (Game & game) {
-	if(!sf::Keyboard::isKeyPressed(sf::Keyboard::P)){
+	if(!m_pause){
 	//if(m_maincharacter.CollideWith(m_obstacle)){
 		//m_maincharacter.ChangeState();
+		m_tpause.setFillColor({0,0,0,0});
 		m_time = m_clock.getElapsedTime();
 		m_clock.restart();
 		this->m_points++;
@@ -31,7 +39,11 @@ void Match::Update (Game & game) {
 		
 		m_bckspeed.x -= .002;
 		m_sprbck.move(m_bckspeed.x,0);
+	} else { 
+		m_tpause.setFillColor({0,0,0,255});
 	}
+	
+	if(m_EscapePressed) game.SetScene(new Title()); 
 }
 
 void Match::Draw (RenderWindow & window) {
@@ -39,6 +51,7 @@ void Match::Draw (RenderWindow & window) {
 	window.draw(m_sprbck);
 	window.draw(m_textpoints);
 	window.draw(m_tpoint);
+	window.draw(m_tpause);
 	m_maincharacter.Draw(window);
 }
 
@@ -60,5 +73,10 @@ void Match::LoadResources ( ) {
 	m_tpoint.setString(auxs);
 	m_tpoint.setPosition(675,50);
 	m_tpoint.setFillColor(sf::Color::Black);
+	
+	m_tpause.setFont(m_font);
+	m_tpause.setString("PAUSED!");
+	m_tpause.setFillColor({0,0,0,0});
+	m_tpause.setPosition(300,300);
 }
 

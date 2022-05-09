@@ -81,11 +81,11 @@ void Title::Update (Game &game) {
 	unsigned char b = rand();
 	m_texts[0].setFillColor({r,g,b});
 	
-	if(m_ReturnPressed == true && m_selecteditem == 1) {
+	if(m_ReturnPressed && m_selecteditem == 1) {
 		m_ReturnPressed = false; m_music.stop(); game.SetScene(new Instructions()); 
 	}
 	
-	if(m_ReturnPressed == true && m_selecteditem == 3) {
+	if(m_ReturnPressed && m_selecteditem == 3) {
 		game.CloseGame();
 	}
 }
