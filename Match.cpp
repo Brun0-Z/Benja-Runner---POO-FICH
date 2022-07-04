@@ -7,76 +7,144 @@
 #include <SFML/Window/Keyboard.hpp>
 #include <SFML/Window/Event.hpp>
 #include "Title.h"
+#include <cstdlib>
+#include "Obstacle.h"
+#include <SFML/System/Sleep.hpp>
+#include <algorithm>
+#include <iostream>
 using namespace std;
 
 Match::Match() {
 	this->LoadResources();
+	game_view.reset(FloatRect(0,80, 500, 500)); //Esto es la vista del juego. Es como una cámara. Los valores asignados son como un zoom para el juego
 }
 
 void Match::ProcessEvent (Event & evt) {
-	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::P){
-		m_pause = !m_pause;
+	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::P or evt.type == Event::KeyPressed && evt.key.code == Keyboard::Escape){
+		m_pause = !m_pause; //Se pausa el juego
 	}
-	if(evt.type == Event::KeyPressed && evt.key.code == Keyboard::Escape){
-		m_EscapePressed = !m_EscapePressed;
+
+}
+
+void Match::ObstaclesManager(){ //Esta función asigna el tiempo de esperas entre generación de trampas de acuerdo al puntaje actual
+	switch(this->m_points){
+	case 500 : 
+		m_waittime = .5;
+	break;
+	case 2000 : 
+		m_waittime = .2;
+	break;
+	case 5000 : 
+		m_waittime = .1;
+	break;
 	}
+}
+
+void Match::SpawnObstacle(){ //Para el spawn de trampas
+	m_time = m_clock1.getElapsedTime(); //Se toma un tiempo
+	if(m_time.asSeconds() >= m_waittime && m_obstacles.size() < 5){ //Si el tiempo es mayor o igual al de espera, y no hay más de 3 trampas en pantalla
+		int m_rand = rand()%8; //Se hace un random entre 0 y 8
+		if(m_rand > 2){ //Si el número es mayor a 2 (vease 3,4,5...). OBS: podría usarse otro condicional, como que sea un número par/impar, etc.
+			Obstacle m_obs; //Se crea el obstáculo
+			m_obstacles.push_back(m_obs); //Y se agrega al vector de obstáculos
+		}
+		m_clock1.restart(); //Se hace reset del reloj para la siguiente llamada
+	}
+}
+
+bool out_window(Obstacle &o){ //Esta función sirve para ver si el obstáculo en cuestión está fuera de pantalla. 
+	Vector2f pos = o.getPosition(); //Se toma la posición actual del sprite (aunque solo interesa la posición en x, porque en y siempre es la misma)
+	if(pos.x <= -100) return true; //El -100 es arbitrario. Debería usarse el borde derecho de la trampa respecto al 0 en x de la pantalla
+	return false; //Si no está fuera de pantalla, no se tiene que hacer nada
 }
 
 void Match::Update (Game & game) {
-	if(!m_pause){
-	//if(m_maincharacter.CollideWith(m_obstacle)){
-		//m_maincharacter.ChangeState();
-		m_tpause.setFillColor({0,0,0,0});
-		m_time = m_clock.getElapsedTime();
-		m_clock.restart();
-		this->m_points++;
-		stringstream ss;
-		ss<<m_points;
-		string auxs = ss.str();
-		m_tpoint.setString(auxs);
+	if(!m_pause){ //Mientras el juego no está pausado
+		if(m_music.getStatus() == sf::Sound::Paused) m_music.play();
 		
-		m_maincharacter.Update();
+		m_tpause.setFillColor({0,0,0,0}); //Se ponen en invisible los textos referente a la pausa
+		m_tescape1.setFillColor({0,0,0,0});
+		m_tescape2.setFillColor({0,0,0,0});
 		
-		m_bckspeed.x -= .002;
-		m_sprbck.move(m_bckspeed.x,0);
-	} else { 
-		m_tpause.setFillColor({0,0,0,255});
-	}
+		m_background.Update(); //Se invoca el update del fondo 
+		m_maincharacter.Update(m_background.viewFloor()); //Se invoca el update del jugador pasandole el rectángulo del piso
+		this->SpawnObstacle(); //Se llama a la funcion para invocar obstáculo
+		float veloc = m_background.getSpeed().x; //Se guarda la velocidad actual del fondo para pasarsela al vector de trampas
+		for(int i=0;i<m_obstacles.size();++i) {	
+			if(out_window(m_obstacles[i])) m_obstacles.erase(m_obstacles.begin() + i); //Se fija si la trampa está fuera de pantalla y la borra si lo está
+			m_obstacles[i].Update(veloc); //Se hace el update de cada trampa de acuerdo a la velocidad del fondo, para moverse a la par
+		}
 	
-	if(m_EscapePressed) game.SetScene(new Title()); 
+		this->m_points++; //Aumenta la puntuación en 1 en cada update 
+		string auxs = to_string(m_points/5); //Se pasa el puntaje a string y se lo guarda. Se divide la cantidad de puntos por 5 (porque si no el juego iría muy rápido en cuanto a puntuaciones. Decisión arbitraria.Si el juego tiene 60 FPS, son 60 puntos en un segundo.
+		m_tpoint.setString(auxs); //Y este string se usa para mostrar en pantalla
+	} 
+	else { 
+		m_music.pause(); //Si se pausa el juego, se pausa la música y se muestran los textos de pausa
+		m_tpause.setFillColor({255,0,0,255});
+		m_tescape1.setFillColor({0,0,0,255});
+		m_tescape2.setFillColor({0,0,0,255});
+		if(sf::Keyboard::isKeyPressed(sf::Keyboard::Y)){ //Si está pausado y se aprieta la Y, se vuelve al menú principal. No se guardan los puntos
+			m_music.stop(); game_view.reset(FloatRect(0,0,800,600)); game.SetScene(new Title()); //Se recupera el view general (no hay zoom por así decirlo)
+		}
+	}
+	for(Obstacle obs : m_obstacles){  //Para cada obstáculo
+		if(m_maincharacter.CollideWith(obs)) { //Si el personaje choca con uno
+			m_music.stop();  
+			game_view.reset(FloatRect(0,0,800,600));
+			game.SetScene(new death_scene(this->m_points/5)); //Se pasa a la pantalla de Game Over pasándole los puntos divididos por 5
+		}
+	}
 }
 
-void Match::Draw (RenderWindow & window) {
+
+void Match::Draw (RenderWindow & window) { //Se dibujan las cosas en pantalla
 	window.clear();
-	window.draw(m_sprbck);
+	window.setView(game_view);
+	m_background.Draw(window);
 	window.draw(m_textpoints);
 	window.draw(m_tpoint);
-	window.draw(m_tpause);
+	for(int i=0;i<m_obstacles.size();++i) { m_obstacles[i].Draw(window); }
 	m_maincharacter.Draw(window);
+	window.draw(m_tpause);
+	window.draw(m_tescape1);
+	window.draw(m_tescape2);
 }
 
-void Match::LoadResources ( ) {
-	m_txtbck.loadFromFile("backgrounds/backgroundgame.png"); m_txtbck.setRepeated(true);
-	m_sprbck.setTexture(m_txtbck); m_sprbck.setTextureRect(IntRect(100,0,999999,1000));
-	m_sprbck.setScale(2,2.35);
-	
+void Match::LoadResources ( ) { //Se cargan imágenes, fuentes, se asignan posiciones, etc
 	m_font.loadFromFile("fonts/Cartoon.ttf");
 	m_textpoints.setFont(m_font); m_textpoints.setFillColor(sf::Color::Black);
-	m_textpoints.setString("Points:"); m_textpoints.setPosition(500,50);
+	m_textpoints.setString("Points:"); m_textpoints.setPosition(160,150);
 	
-	m_bckspeed.x = -2;
+	m_music.openFromFile("music/ingame.ogg"); 
+	m_music.setVolume(50);
+	m_music.play();
+	m_music.setLoop(true);
 	
 	stringstream ss;
 	ss<<m_points;
 	string auxs = ss.str();
 	m_tpoint.setFont(m_font);
 	m_tpoint.setString(auxs);
-	m_tpoint.setPosition(675,50);
+	m_tpoint.setPosition(340,150);
 	m_tpoint.setFillColor(sf::Color::Black);
 	
 	m_tpause.setFont(m_font);
 	m_tpause.setString("PAUSED!");
 	m_tpause.setFillColor({0,0,0,0});
-	m_tpause.setPosition(300,300);
+	m_tpause.setPosition(150,300);
+	
+	m_tescape1.setFont(m_font);
+	m_tescape1.setScale(.35,.35);
+	m_tescape1.setString("Y to exit to main menu \n P/Escape to resume");
+	m_tescape1.setFillColor({0,0,0,0});
+	m_tescape1.setPosition(150,500);
+	
+	m_tescape2.setFont(m_font);
+	m_tescape2.setScale(.35,.35);
+	m_tescape2.setString("(If you leave the run, you will loss your progress!)");
+	m_tescape2.setFillColor({0,0,0,0});
+	m_tescape2.setPosition(50,550);
 }
+
 

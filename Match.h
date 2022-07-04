@@ -8,6 +8,13 @@
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include "Object.h"
+#include "Background.h"
+#include "Obstacle.h"
+#include <SFML/Audio/Music.hpp>
+#include <vector>
+#include <SFML/Graphics/View.hpp>
+using namespace std;
 
 class Match : public Scene {
 public:
@@ -15,16 +22,21 @@ public:
 	void ProcessEvent (Event & evt);
 	void Update (Game & game);
 	void Draw (RenderWindow & window);
-	void LoadResources ( );
-	void EndGame(); 
+	void LoadResources ();
+	void SpawnObstacle();
+	void ObstaclesManager();
 private:
 	Character m_maincharacter;
-	int m_points = 0;
+	vector<Obstacle> m_obstacles;
+	Background m_background;
+	int m_points = 1, m_waittime = 1;
+	View game_view;
 	Texture m_txtbck; Sprite m_sprbck;
 	bool m_pause = false, m_EscapePressed = false;
-	Clock m_clock;
+	Clock m_clock1, m_clock2;
+	Music m_music;
 	Time m_time;
-	Text m_textpoints, m_tpoint, m_tpause;
+	Text m_textpoints, m_tpoint, m_tpause, m_tescape1, m_tescape2;
 	Font m_font;
 	Vector2f m_bckspeed;
 };

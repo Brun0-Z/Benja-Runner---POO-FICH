@@ -17,8 +17,8 @@ public:
 private:
 	Font m_font;
 	Text m_textinstruction[4];
-	Texture m_tinst1, m_tinst2,m_tbackground;
-	Sprite m_instru1, m_instru2,m_background;
+	Texture m_tinst1,m_tbackground;
+	Sprite m_instru1,m_background;
 	bool m_EscapePressed = false, m_ReturnPressed = false;
 };
 

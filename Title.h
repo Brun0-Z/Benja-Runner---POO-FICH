@@ -9,7 +9,6 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Window/Event.hpp>
-#define MAX_NUMBER_OF_ITEMS 4
 #include "Character.h"
 using namespace sf;
 

@@ -7,6 +7,7 @@
 #include <SFML/System/Clock.hpp>
 #include <vector>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/Graphics/Rect.hpp>
 using namespace std;
 using namespace sf;
 
@@ -14,25 +15,22 @@ class Character : public Object {
 public:
 	Character();
 	void LoadTextures();
-	void Update();
-	void Draw(RenderWindow &window);
-	bool CollideWith(const Object &o) const;
+	void Update(sf::FloatRect platform_bounds);
 	void ResetFrame();
-	void ChangeState();
-	bool CheckState();
-	bool InFloor();
+	void Collision();
 	void Jump();
-	
-	void Run();
+	void Run(float anmvel);
+	float m_anmvel = 0; float m_maxanmvel;
 private:
 	int m_frame = 0;
 	vector<Texture>m_runtxt;
 	vector<Texture>m_dthtxt;
 	vector<Texture>m_jumptxt;
 	Clock m_clock;
-	bool m_IsAlive = true;
+	FloatRect player_bounds;
+	bool IsAlive = true, IsJumping = false;
 	Vector2f m_vel, m_pos;
-	bool IsJumping = false;
+	
 };
 
 #endif

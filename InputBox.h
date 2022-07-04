@@ -57,7 +57,7 @@ public:
 		editable=true;
 		setFont(font);
 		setCharacterSize(size);
-		setColor(color);
+		setFillColor(color);
 	}
 	bool processEvent(const sf::Event &event) {
 		if (!editable) return false;

@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <SFML/Window/Event.hpp>
 #include "Instructions.h"
+#include "ScoresMenu.h"
 
 using namespace std;   
 using namespace sf;
@@ -49,7 +50,7 @@ void Title::MenuUp(){
 	}
 }
 void Title::MenuDown(){
-	if(m_selecteditem + 1 < MAX_NUMBER_OF_ITEMS){
+	if(m_selecteditem + 1 < 4){
 		m_texts[m_selecteditem].setOutlineColor(sf::Color::White);
 		m_texts[m_selecteditem].setOutlineThickness(0.f);
 		m_texts[m_selecteditem].setFillColor(sf::Color::White);
@@ -85,18 +86,22 @@ void Title::Update (Game &game) {
 		m_ReturnPressed = false; m_music.stop(); game.SetScene(new Instructions()); 
 	}
 	
+	if(m_ReturnPressed && m_selecteditem == 2) {
+		m_ReturnPressed = false; m_music.stop(); game.SetScene(new ScoresMenu()); 
+	}
+	
 	if(m_ReturnPressed && m_selecteditem == 3) {
-		game.CloseGame();
+		game.saveScores(); game.CloseGame();
 	}
 }
 
 void Title::LoadResources(){
-	m_texture.loadFromFile("backgrounds/backgroundmenu.jpg");
+	m_texture.loadFromFile("sprites/backgroundmenu.jpg");
 	m_sprite.setTexture(m_texture);
 	m_sprite.setScale(0.6,0.8);
 	
 	m_music.openFromFile("music/title.ogg"); 
-	m_music.setVolume(25);
+	m_music.setVolume(5);
 	m_music.play();
 	m_music.setLoop(true);
 	
