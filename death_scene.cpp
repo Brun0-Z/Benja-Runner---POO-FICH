@@ -4,6 +4,7 @@
 #include <cstring>
 #include "Match.h"
 #include "Title.h"
+#include <cctype>
 using namespace std;
 
 death_scene::death_scene(int points) : inp(m_font){ //Se encarga de crear la escena a partir del puntaje de la partida. inp es el inputbox que recibe una fuente
@@ -86,11 +87,10 @@ void death_scene::MenuDown(){ //Básicamente, da contorno a las letras selecciona
 }
 
 void death_scene::Update (Game & game) {
-	
 	if(m_ReturnPressed && m_selecteditem == 3) { //Si se selecciona la opción Retry
 		m_ReturnPressed = false; 
 		string str = inp.getValue(); //Se guarda en un string auxiliar lo que se haya ingresado en la inputbox
-		if(str == "")str = "AAA"; //Si llega a ser vacía, se pone un nombre auxiliar AAA 
+		if(str == "" || str.size() != 3)str = "AAA"; //Si llega a ser vacía, se pone un nombre auxiliar AAA 
 		strcpy(aux.m_nick,str.c_str()); //Se copia en el struct auxiliar el nombre ingresado por teclado
 		structScore add(aux.m_nick,this->m_score); //Se crea entonces l struct correspondiente
 		game.Add_NewHighscore(add); //Y se invoca a la función de guardar el puntaje
@@ -100,7 +100,10 @@ void death_scene::Update (Game & game) {
 	if(m_ReturnPressed && m_selecteditem == 4) { //Si se selecciona Menú, idem a lo de arriba, salvo que en vez de una partida, va al menu
 		m_ReturnPressed = false;  
 		string str = inp.getValue(); 
-		if(str == "")str = "AAA";
+		if(str == "" || str.size() != 3)str = "AAA";
+		for(int i=0;i<str.size();++i) {
+			str[i] = toupper(str[i]);
+		}
 		strcpy(aux.m_nick,str.c_str());
 		structScore add(aux.m_nick,this->m_score);
 		game.Add_NewHighscore(add); 
@@ -130,7 +133,6 @@ void death_scene::LoadResources ( ) { //Se cargan imágenes, fondos, se asignan p
 	}
 	
 	inp.setMaxChars(3);
-	inp.setString("AAA");
 	inp.setScale(1.8,1.8);
 	inp.setPosition(320,380);
 	inp.setFillColor({128,128,128});
@@ -141,6 +143,7 @@ void death_scene::LoadResources ( ) { //Se cargan imágenes, fondos, se asignan p
 	m_text[2].setString("Insert your name");
 	m_text[3].setString("Retry");
 	m_text[4].setString("Menu");
+	m_text[5].setString("Too short!");
 	
 	m_text[0].setScale(2.2,2.2);
 	m_text[0].setPosition(150,100); //mas a la izq

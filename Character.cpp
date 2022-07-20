@@ -14,6 +14,7 @@ using namespace std;
 Character::Character() : Object(){
 	LoadTextures();
 }
+
 void Character::LoadTextures(){
 	
 	m_runtxt.resize(8);
@@ -26,8 +27,11 @@ void Character::LoadTextures(){
 		m_jumptxt[i].loadFromFile("sprites/jumpanm/"+to_string(i)+".png"); //Se cargan las animaciones de saltar
 	}
 	
+	damage.loadFromFile("music/Minecraft-Oof.ogg");
+	m_damage.setBuffer(damage);
+	
 	m_sprite.setTexture(m_runtxt[0]); //Se asigna la textura inicial de correr
-	m_sprite.setPosition(10,485);  //Se le da una posición al sprite (ya que no se mueve en la partida)
+	m_sprite.setPosition(10,500);  //Se le da una posición al sprite (ya que no se mueve en la partida)
 	m_pos = m_sprite.getPosition(); //Se guarda la pos del sprite
 	m_sprite.setScale(3,3); //Y se le da un tamaño
 }
@@ -37,21 +41,22 @@ void Character::ResetFrame() {
 }
 
 void Character::Update(sf::FloatRect platform_bounds){ //El update del personaje recibe el rectángulo correspondiente al piso
-	m_vel.y += .33333333; //en cada update, se agrega velocidad en y. Es decir, gravedad (hacia abajo)
-	m_pos.y += m_vel.y; //Y la pos se corresponde a esta velocidad agregada
+	if(m_IsAlive){
+		m_vel.y += .4; //en cada update, se agrega velocidad en y. Es decir, gravedad (hacia abajo)
+		m_pos.y += m_vel.y; //Y la pos se corresponde a esta velocidad agregada
 	
-	if(m_anmvel >= -30) //En este caso, anmvel se usa para hacer que la animación de correr se ejecute más rápido con el paso del tiempo
-	m_anmvel -= 0.01; 
+		if(m_anmvel >= -30) //En este caso, anmvel se usa para hacer que la animación de correr se ejecute más rápido con el paso del tiempo
+		m_anmvel -= 0.01; 
 	
-	m_sprite.setPosition(m_pos); //se le setea la posición de acuerdo al cambio que hay con respecto a la velocidad en y
-	player_bounds = m_sprite.getGlobalBounds(); //Se guarda el rectángulo de colisión
+		m_sprite.setPosition(m_pos); //se le setea la posición de acuerdo al cambio que hay con respecto a la velocidad en y
+		player_bounds = m_sprite.getGlobalBounds(); //Se guarda el rectángulo de colisión
 	
-	if(player_bounds.intersects(platform_bounds)){ //Si el pj está sobre el suelo
-		m_vel.y = 0; //La vel en y es 0 (porque si no atravesaría)
-		m_pos.y = platform_bounds.top - (player_bounds.height); m_sprite.setPosition(m_pos.x,m_pos.y); //y se cambia la pos de acuerdo al rectángulo del piso, seteando así la pos del pj
-		if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){ //Solo se puede saltar estando en el piso
-			Jump();
-		}
+		if(player_bounds.intersects(platform_bounds)){ //Si el pj está sobre el suelo
+			m_vel.y = 0; //La vel en y es 0 (porque si no atravesaría)
+			m_pos.y = platform_bounds.top - (player_bounds.height); m_sprite.setPosition(m_pos.x,m_pos.y); //y se cambia la pos de acuerdo al rectángulo del piso, seteando así la pos del pj
+			if(sf::Keyboard::isKeyPressed(sf::Keyboard::W) || sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){ //Solo se puede saltar estando en el piso
+				Jump();
+			}
 		else Run(m_anmvel); //Mientras no esté saltando, el pj corre
 	}
 	
@@ -67,10 +72,26 @@ void Character::Update(sf::FloatRect platform_bounds){ //El update del personaje
 			m_vel.y += .5;
 		}
 	}
+	}
+	else{
+		m_sprite.setColor({sf::Color::Red});
+	}
+}
+
+void Character::DeathSound(){
+	m_damage.play();
+}
+
+bool Character::CheckState(){
+	return m_IsAlive;
+}
+
+void Character::ChangeState(){
+	m_IsAlive = false;
 }
 
 void Character::Jump(){ 
-	m_vel.y = -15; //Al saltar, se pone velocidad negativa en y (hacia arriba)
+	m_vel.y = -13; //Al saltar, se pone velocidad negativa en y (hacia arriba)
 	IsJumping = true; //IsJumping se vuelve verdadero
 	ResetFrame(); //Y se llama a ResetFrame para que se ejecute la animación de salto desde el primer frame
 }

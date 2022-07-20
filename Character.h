@@ -8,6 +8,8 @@
 #include <vector>
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Graphics/Rect.hpp>
+#include <SFML/Audio/SoundBuffer.hpp>
+#include <SFML/Audio/Sound.hpp>
 using namespace std;
 using namespace sf;
 
@@ -17,8 +19,10 @@ public:
 	void LoadTextures();
 	void Update(sf::FloatRect platform_bounds);
 	void ResetFrame();
-	void Collision();
+	void ChangeState();
+	bool CheckState();
 	void Jump();
+	void DeathSound();
 	void Run(float anmvel);
 	float m_anmvel = 0; float m_maxanmvel;
 private:
@@ -28,9 +32,10 @@ private:
 	vector<Texture>m_jumptxt;
 	Clock m_clock;
 	FloatRect player_bounds;
-	bool IsAlive = true, IsJumping = false;
+	bool m_IsAlive = true, IsJumping = false;
 	Vector2f m_vel, m_pos;
-	
+	SoundBuffer damage;
+	Sound m_damage;
 };
 
 #endif

@@ -24,7 +24,7 @@ public:
 private:
 	structScore aux;
 	int m_score;
-	Text m_text[6];
+	Text m_text[5];
 	Texture m_tbackground;
 	Sprite m_background;
 	Font m_font;

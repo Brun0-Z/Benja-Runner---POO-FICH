@@ -10,7 +10,6 @@ Game::Game() : m_window(VideoMode(800,600),"Benja Runner"){
 	m_window.setFramerateLimit(60); //Fijar el límite de FPS en 60
 	this->InitHighScore(); //Invoca a la función que abre el archivo de puntos
 	m_scene = new Title(); //Y pone que la primer escena sea la del título(menu)
-	
 }
 
 void Game::Run ( ) {
@@ -41,7 +40,7 @@ void Game::CloseGame() {
 }
 
 void Game::SetScene (Scene * next_scene) {
-	m_next_scene = next_scene; //La función recibe un puntero a la siguinte escena, y se encarga de guardarlo en la variable local
+	m_next_scene = next_scene; //La función recibe un puntero a la siguiente escena, y se encarga de guardarlo en la variable local
 }
 
 
@@ -52,7 +51,7 @@ if(!m_archivo){ //Si no se puede abrir
 	fstream newarchivo("bin/HighScores.bin",ios::trunc|ios::binary|ios::out); //Lo crea
 	
 	for (int i = 0; i < 5; i++){ //Se crean 5 posiciones con
-		char caux[3] = "--"; //Un char de tamaño 3 
+		char caux[4] = "AAA"; //Un char de tamaño 3 
 		structScore aux(caux,0); //Se crea una puntuación, con el nombre auxiliar y puntuación cero
 		m_highscores.push_back(aux); //Se agrega la puntuación al vector de puntajes
 		newarchivo.write(reinterpret_cast<char*>(&aux),sizeof(structScore)); //Se escribe en el archivo la puntuación
@@ -75,16 +74,11 @@ m_archivo.close();
 
 
 void Game::Add_NewHighscore(structScore m_newscore){ //Para agregar un score, se recibe un puntaje
-	for(int i=0;i<m_highscores.size();++i) { //Y se recorre el vector
-		if(m_highscores[i] < m_newscore){ //Si encuentra un puntaje menor al recibido
-			m_highscores.push_back(m_newscore); //Se hace push_back con el nuevo puntaje
-			sort(m_highscores.begin(),m_highscores.end()); //Se hace un sort para ordenarlos
-			reverse(m_highscores.begin(),m_highscores.end()); //Y un reverse para ponerlos de menor a mayor
-			m_highscores.pop_back(); //Eliminando el último de la lista (porque si no son 6)
-			saveScores();//y se guarda en el archivo
-			break; //Hace un break después de encontrar el primer puntaje menor porque si no seguiría recorriendo el vector
-		}
-	}
+	m_highscores.push_back(m_newscore); //Se hace push_back con el nuevo puntaje
+	sort(m_highscores.begin(),m_highscores.end()); //Se hace un sort para ordenarlos
+	reverse(m_highscores.begin(),m_highscores.end()); //Y un reverse para ponerlos de mayor a menor
+	m_highscores.pop_back(); //Eliminando el último de la lista (porque si no son 6) osea el menor
+	saveScores();//y se guarda en el archivo
 }
 
 vector<structScore> Game::getHighScores(){ //Función que devuelve el vector de puntuaciones (usado en la pantalla de puntuaciones)
@@ -94,6 +88,10 @@ vector<structScore> Game::getHighScores(){ //Función que devuelve el vector de p
 
 void Game::saveScores(){
 	ofstream file("bin/HighScores.bin",ios::ate|ios::binary|ios::out|ios::trunc); //Se abre el archivo para escritura 
+	
+	for(int i=0;i<m_highscores.size();++i) { 
+		m_highscores[i].uppernick();
+	}
 	
 	for(size_t i=0; i<m_highscores.size();++i){ //Se recorre el vector de puntajes
 		structScore aux = m_highscores[i]; //se crea un struct auxiliar que toma los valores del puntaje de la posición i

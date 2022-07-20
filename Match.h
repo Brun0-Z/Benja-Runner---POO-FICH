@@ -32,13 +32,15 @@ private:
 	int m_points = 1, m_waittime = 1;
 	View game_view;
 	Texture m_txtbck; Sprite m_sprbck;
-	bool m_pause = false, m_EscapePressed = false;
+	bool m_pause = false, m_EscapePressed = false, CanPause = true;
 	Clock m_clock1, m_clock2;
 	Music m_music;
-	Time m_time;
+	Time m_time1, m_time2;
 	Text m_textpoints, m_tpoint, m_tpause, m_tescape1, m_tescape2;
 	Font m_font;
 	Vector2f m_bckspeed;
+	SoundBuffer activated;
+	Sound m_close;
 };
 
 #endif
